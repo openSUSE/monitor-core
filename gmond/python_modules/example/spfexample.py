@@ -133,5 +133,5 @@ if __name__ == '__main__':
     d = metric_init(params)
     for d in descriptors:
         v = d['call_back'](d['name'])
-        print 'value for %s is %s' % (d['name'], str(v))
-    print d
+        print('value for %s is %s' % (d['name'], str(v)))
+    print(d)

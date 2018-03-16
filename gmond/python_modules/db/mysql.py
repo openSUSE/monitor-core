@@ -165,9 +165,9 @@ def update_stats(get_innodb=True, get_master=True, get_slave=True):
         cursor.close()
 
         conn.close()
-    except MySQLdb.OperationalError, (errno, errmsg):
+    except MySQLdb.OperationalError as errinst:
         logging.error('error updating stats')
-        logging.error(errmsg)
+        logging.error(errinst.errmsg)
         return False
 
     # process variables
@@ -1165,7 +1165,7 @@ if __name__ == '__main__':
     for d in descriptors:
         v = d['call_back'](d['name'])
         if not options.quiet:
-            print ' %s: %s %s [%s]' % (d['name'], v, d['units'], d['description'])
+            print(' %s: %s %s [%s]' % (d['name'], v, d['units'], d['description']))
 
         if options.gmetric:
             if d['value_type'] == 'uint':

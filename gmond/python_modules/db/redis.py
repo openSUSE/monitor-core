@@ -83,7 +83,7 @@ def metric_handler(name):
                           v = cps
                   #logging.debug("submittincg metric %s is %s" % (n, int(v)))
                   metric_handler.info[n] = int(v)  # TODO Use value_type.
-        except Exception, e:
+        except Exception as e:
             #logging.debug("caught exception %s" % e)
             pass
         s.close()

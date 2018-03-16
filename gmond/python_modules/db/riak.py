@@ -116,7 +116,7 @@ def metric_init(params):
     if "metrix_prefix" not in params:
         params["metrix_prefix"] = "riak"
 
-    print params
+    print(params)
 
     # initialize skeleton of descriptors
     Desc_Skel = {

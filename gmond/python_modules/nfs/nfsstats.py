@@ -388,7 +388,7 @@ def debug(level, text):
     if level > verboselevel:
         return
     if sys.stderr.isatty():
-        print text
+        print(text)
     else:
         syslog.syslog(text)
 

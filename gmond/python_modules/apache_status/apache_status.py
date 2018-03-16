@@ -159,7 +159,7 @@ def get_delta(name):
     try:
         delta = multiplier * (float(curr_metrics['data'][name]) - float(last_metrics['data'][name])) / (curr_metrics['time'] - last_metrics['time'])
         if delta < 0:
-            print name + " is less 0"
+            print(name + " is less 0")
             delta = 0
     except KeyError:
         delta = 0.0
@@ -177,8 +177,8 @@ def create_desc(prop):
 def metric_init(params):
     global descriptors, Desc_Skel, SERVER_STATUS_URL, COLLECT_SSL
 
-    print '[apache_status] Received the following parameters'
-    print params
+    print('[apache_status] Received the following parameters')
+    print(params)
 
     if "metric_group" not in params:
         params["metric_group"] = "apache"
@@ -404,9 +404,9 @@ if __name__ == '__main__':
             for d in descriptors:
                 v = d['call_back'](d['name'])
                 if d['name'] == NAME_PREFIX + "rps":
-                    print 'value for %s is %.4f' % (d['name'], v)
+                    print('value for %s is %.4f' % (d['name'], v))
                 else:
-                    print 'value for %s is %s' % (d['name'], v)
+                    print('value for %s is %s' % (d['name'], v))
             time.sleep(15)
     except KeyboardInterrupt:
         os._exit(1)

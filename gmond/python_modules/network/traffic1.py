@@ -104,8 +104,8 @@ class UpdateTrafficThread(threading.Thread):
 def metric_init(params):
     global Desc_Skel, _Worker_Thread, Debug
 
-    print '[traffic1] Received the following parameters'
-    print params
+    print('[traffic1] Received the following parameters')
+    print(params)
 
     Desc_Skel = {
         'name'        : 'XXX',
@@ -201,5 +201,5 @@ if __name__ == '__main__':
         time.sleep(0.2)
         os._exit(1)
     except StandardError:
-        print sys.exc_info()[0]
+        print(sys.exc_info()[0])
         os._exit(1)

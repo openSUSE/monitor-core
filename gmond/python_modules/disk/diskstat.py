@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 #  This script reports disk stat metrics to ganglia.
 #
 #  Notes:
@@ -532,7 +532,7 @@ if __name__ == '__main__':
         for d in descriptors:
             v = d['call_back'](d['name'])
             if not options.quiet:
-                print ' %s: %s %s [%s]' % (d['name'], v, d['units'], d['description'])
+                print(' %s: %s %s [%s]' % (d['name'], v, d['units'], d['description']))
 
             if options.gmetric:
                 if d['value_type'] == 'uint':
@@ -544,5 +544,5 @@ if __name__ == '__main__':
                     (options.gmetric_bin, options.gmond_conf, v, d['units'], value_type, d['name'], d['slope'])
                 os.system(cmd)
 
-        print 'Sleeping 15 seconds'
+        print('Sleeping 15 seconds')
         time.sleep(15)

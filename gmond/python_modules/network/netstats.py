@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 # This module allows you to collect network stats. These values that are collected from
 #
 # /proc/net/netstat
@@ -46,16 +47,16 @@ def get_metrics():
             for line in file:
                 if re.match("(.*): [0-9]", line):
                     count = 0
-                    metrics = re.split("\s+", line)
+                    metrics = re.split("\s+", line.strip())
                     metric_group = metrics[0].replace(":", "").lower()
                     if metric_group not in stats_pos:
                         continue
                     new_metrics[metric_group] = dict()
                     for value in metrics:
                         # Skip first
-                        if count > 0 and value >= 0 and count in stats_pos[metric_group]:
+                        if count > 0 and int(value) >= 0 and count in stats_pos[metric_group]:
                             metric_name = stats_pos[metric_group][count]
-                            new_metrics[metric_group][metric_name] = value
+                            new_metrics[metric_group][metric_name] = int(value)
                         count += 1
 
             file.close()
@@ -101,7 +102,7 @@ def get_delta(name):
     try:
         delta = (float(curr_metrics['data'][group][metric]) - float(last_metrics['data'][group][metric])) / (curr_metrics['time'] - last_metrics['time'])
         if delta < 0:
-            print name + " is less 0"
+            print(name + " is less 0")
             delta = 0
     except KeyError:
         delta = 0.0
@@ -117,7 +118,7 @@ def get_tcploss_percentage(name):
     try:
         pct = 100 * (float(curr_metrics['data']['tcpext']["tcploss"]) - float(last_metrics["data"]['tcpext']["tcploss"])) / (float(curr_metrics['data']['tcp']['outsegs']) + float(curr_metrics['data']['tcp']['insegs']) - float(last_metrics['data']['tcp']['insegs']) - float(last_metrics['data']['tcp']['outsegs']))
         if pct < 0:
-            print name + " is less 0"
+            print(name + " is less 0")
             pct = 0
     except KeyError:
         pct = 0.0
@@ -135,7 +136,7 @@ def get_tcpattemptfail_percentage(name):
     try:
         pct = 100 * (float(curr_metrics['data']['tcp']["attemptfails"]) - float(last_metrics["data"]['tcp']["attemptfails"])) / (float(curr_metrics['data']['tcp']['outsegs']) + float(curr_metrics['data']['tcp']['insegs']) - float(last_metrics['data']['tcp']['insegs']) - float(last_metrics['data']['tcp']['outsegs']))
         if pct < 0:
-            print name + " is less 0"
+            print(name + " is less 0")
             pct = 0
     except Exception:
         pct = 0.0
@@ -151,7 +152,7 @@ def get_retrans_percentage(name):
     try:
         pct = 100 * (float(curr_metrics['data']['tcp']["retranssegs"]) - float(last_metrics['data']['tcp']["retranssegs"])) / (float(curr_metrics['data']['tcp']['outsegs']) + float(curr_metrics['data']['tcp']['insegs']) - float(last_metrics['data']['tcp']['insegs']) - float(last_metrics['data']['tcp']['outsegs']))
         if pct < 0:
-            print name + " is less 0"
+            print(name + " is less 0")
             pct = 0
     except KeyError:
         pct = 0.0
@@ -163,7 +164,7 @@ def get_retrans_percentage(name):
 
 def create_desc(skel, prop):
     d = skel.copy()
-    for k, v in prop.iteritems():
+    for k, v in prop.items():
         d[k] = v
     return d
 
@@ -266,6 +267,6 @@ if __name__ == '__main__':
     while True:
         for d in descriptors:
             v = d['call_back'](d['name'])
-            print '%s = %s' % (d['name'], v)
-        print 'Sleeping 15 seconds'
+            print('%s = %s' % (d['name'],  v))
+        print('Sleeping 15 seconds')
         time.sleep(15)

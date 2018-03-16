@@ -94,18 +94,18 @@ class UpdateMetricThread(threading.Thread):
                             try:
                                 data = fd.recv(8192)
                                 msg += data
-                            except (IOError, OSError), e:
+                            except (IOError, OSError) as e:
                                 if e.errno != errno.EINTR:
                                     raise
 
                     if msg.find("END"):
                         break
-                except select.error, e:
+                except select.error as e:
                     if e[0] != errno.EINTR:
                         raise
 
             sock.close()
-        except socket.error, e:
+        except socket.error as e:
             print >>sys.stderr, "ERROR: %s" % e
 
         for m in msg.split("\r\n"):
@@ -140,7 +140,7 @@ class UpdateMetricThread(threading.Thread):
 def metric_init(params):
     global descriptors, Desc_Skel, _Worker_Thread, Debug
 
-    print '[memcached] memcached protocol "stats"'
+    print('[memcached] memcached protocol "stats"')
     if "type" not in params:
         params["type"] = "memcached"
 
@@ -150,7 +150,7 @@ def metric_init(params):
         elif params["type"] == "Tokyo Tyrant":
             params["metrix_prefix"] = "tt"
 
-    print params
+    print(params)
 
     # initialize skeleton of descriptors
     Desc_Skel = {

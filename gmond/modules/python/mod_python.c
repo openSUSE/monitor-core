@@ -62,6 +62,9 @@
  * Declare ourselves so the configuration routines can find and know us.
  * We'll fill it in at the end of the module.
  */
+#ifdef BUILD_PYTHON3
+#define python_module python3_module
+#endif
 mmodule python_module;
 
 typedef struct
@@ -112,20 +115,41 @@ static char* is_python_module(const char* fname)
     return modname_bfr;
 }
 
+static char* _get_python_string_pointer(PyObject *dv) {
+    char *ret = NULL;
+
+    if(PyByteArray_Check(dv)) {
+        ret = PyByteArray_AsString(dv);
+    }
+#ifdef BUILD_PYTHON3
+    else if(PyUnicode_Check(dv)) {
+        ret = PyUnicode_AsUTF8(dv);
+    }
+#else
+    else if(PyString_Check(dv)) {
+        ret = PyString_AsString(dv);
+    }
+#endif
+
+    return ret;
+}
+
 int
 get_python_string_value(PyObject* dv, char* bfr, int len)
 {
     int cc = 1;
+    char *v;
     if (PyLong_Check(dv)) {
         long v = PyLong_AsLong(dv);
         snprintf(bfr, len, "%ld", v);
     }
+#ifndef BUILD_PYTHON3
     else if (PyInt_Check(dv)) {
         long v = PyInt_AsLong(dv);
         snprintf(bfr, len, "%ld", v);
     }
-    else if (PyString_Check(dv)) {
-        char* v = PyString_AsString(dv);
+#endif
+    else if ((v = _get_python_string_pointer(dv)) != NULL) {
         snprintf(bfr, len, "%s", v);
     }
     else if (PyFloat_Check(dv)) {
@@ -166,15 +190,20 @@ int
 get_python_uint_value(PyObject* dv, unsigned int* pint)
 {
     int cc = 1;
+    char* p;
+#ifdef BUILD_PYTHON3
+    if (PyLong_Check(dv)) {
+        unsigned long v = PyLong_AsUnsignedLongMask(dv);
+#else
     if (PyInt_Check(dv) || PyLong_Check(dv)) {
         unsigned long v = PyInt_AsUnsignedLongMask(dv);
+#endif
         *pint = (unsigned int)v;
     }
-    else if (PyString_Check(dv)) {
+    else if ((p = _get_python_string_pointer(dv)) != NULL) {
         /* Convert from string to int */
         unsigned long tid;
         char *endptr;
-        char* p = PyString_AsString(dv);
         tid = strtoul(p, &endptr, 10);
         if(endptr == p || *endptr)
             cc = -1;    /* Invalid numeric format */
@@ -191,19 +220,21 @@ int
 get_python_int_value(PyObject* dv, int* pint)
 {
     int cc = 1;
+    char* p;
     if (PyLong_Check(dv)) {
         long v = PyLong_AsLong(dv);
         *pint = (int)v;
     }
+#ifndef BUILD_PYTHON3
     else if (PyInt_Check(dv)) {
         long v = PyInt_AsLong(dv);
         *pint = (int)v;
     }
-    else if (PyString_Check(dv)) {
+#endif
+    else if ((p = _get_python_string_pointer(dv)) != NULL) {
         /* Convert from string to int */
         long tid;
         char *endptr;
-        char* p = PyString_AsString(dv);
         tid = strtol(p, &endptr, 10);
         if(endptr == p || *endptr)
             cc = -1;    /* Invalid numeric format */
@@ -240,6 +271,7 @@ int
 get_python_float_value(PyObject* dv, double* pnum)
 {
     int cc = 1;
+    char* p;
     if (PyFloat_Check(dv)) {
         *pnum = PyFloat_AsDouble(dv);
     }
@@ -247,15 +279,16 @@ get_python_float_value(PyObject* dv, double* pnum)
         long v = PyLong_AsLong(dv);
         *pnum = (double)v;
     }
+#ifndef BUILD_PYTHON3
     else if (PyInt_Check(dv)) {
         long v = PyInt_AsLong(dv);
         *pnum = (double)v;
     }
-    else if (PyString_Check(dv)) {
+#endif
+    else if ((p = _get_python_string_pointer(dv)) != NULL) {
         /* Convert from string to int */
         double tid;
         char *endptr;
-        char* p = PyString_AsString(dv);
         tid = strtod(p, &endptr);
         if(endptr == p || *endptr)
             cc = -1;    /* Invalid format for double */
@@ -518,7 +551,11 @@ static PyObject* build_params_dict(cfg_t *pymodule)
             param = cfg_getnsec(pymodule, "param", k);
             name = apr_pstrdup(pool, param->title);
             value = apr_pstrdup(pool, cfg_getstr(param, "value"));
+#ifdef BUILD_PYTHON3
+            pyvalue = PyUnicode_FromStringAndSize(value, strlen(value));
+#else
             pyvalue = PyString_FromString(value);
+#endif
             if (name && pyvalue) {
                 PyDict_SetItemString(params_dict, name, pyvalue);
                 Py_DECREF(pyvalue);
@@ -540,11 +577,30 @@ static PyMethodDef GangliaMethods[] = {
     {NULL, NULL, 0, NULL}
 };
 
+#ifdef BUILD_PYTHON3
+static struct PyModuleDef GangliaModuleDef = {
+    PyModuleDef_HEAD_INIT,
+    "ganglia",
+    NULL,
+    -1,
+    GangliaMethods,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+};
+
+PyMODINIT_FUNC
+PyInit_ganglia(void)
+{
+    return PyModule_Create(&GangliaModuleDef);
+}
+#endif /*BUILD_PYTHON3*/
+
 static int pyth_metric_init (apr_pool_t *p)
 {
     DIR *dp;
     struct dirent *entry;
-    int i;
     char* modname;
     PyObject *pmod, *pinitfunc, *pobj, *pparamdict;
     py_metric_init_t minfo;
@@ -582,12 +638,32 @@ static int pyth_metric_init (apr_pool_t *p)
 
     /* Init Python environment */
 
+#ifdef BUILD_PYTHON3
+    if(0 > PyImport_AppendInittab("ganglia", PyInit_ganglia)) {
+        err_msg("[PYTHON] Can't add ganglia module\n");
+        return -1;
+    }
+#endif
+
     /* Set up the python path to be able to load module from our module path */
     Py_Initialize();
+#ifdef BUILD_PYTHON3
+    if(!PyImport_ImportModule("ganglia")) {
+        err_msg("[PYTHON] Can't import ganglia module\n");
+        if (PyErr_Occurred()) {
+            PyErr_Print();
+        }
+    }
+#else
     Py_InitModule("ganglia", GangliaMethods);
+#endif
 
     PyObject *sys_path = PySys_GetObject("path");
+#ifdef BUILD_PYTHON3
+    PyObject *addpath = PyUnicode_FromStringAndSize(path, strlen(path));
+#else
     PyObject *addpath = PyString_FromString(path);
+#endif
     PyList_Append(sys_path, addpath);
 
     PyEval_InitThreads();
@@ -600,8 +676,6 @@ static int pyth_metric_init (apr_pool_t *p)
         err_msg("[PYTHON] Can't open the python module path %s.\n", path);
         return -1;
     }
-
-    i = 0;
 
     while ((entry = readdir(dp)) != NULL) {
         modname = is_python_module(entry->d_name);

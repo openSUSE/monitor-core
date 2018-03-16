@@ -118,7 +118,7 @@ def metric_init(params):
             continue
 
         if ganglia.get_debug_msg_level() > 1:
-            print 'Discovered device %s' % line[1]
+            print('Discovered device %s' % line[1])
 
         descriptors.append(Init_Metric(line, 'disk_total', int(1200),
             'double', 'GB', 'both', '%.3f',
@@ -140,4 +140,4 @@ if __name__ == '__main__':
     metric_init(None)
     for d in descriptors:
         v = d['call_back'](d['name'])
-        print 'value for %s is %f' % (d['name'],  v)
+        print('value for %s is %f' % (d['name'],  v))

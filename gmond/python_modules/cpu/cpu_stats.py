@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import sys
 import traceback
 import os
@@ -97,7 +98,7 @@ def get_delta(name):
     try:
         delta = (float(curr_metrics['data'][name][0]) - float(last_metrics['data'][name][0])) / (curr_metrics['time'] - last_metrics['time'])
         if delta < 0:
-            print name + " is less 0"
+            print(name + " is less 0")
             delta = 0
     except KeyError:
         delta = 0.0
@@ -124,7 +125,7 @@ def get_softirq_delta(name):
     try:
         delta = (float(curr_metrics['data']['softirq'][index]) - float(last_metrics['data']['softirq'][index])) / (curr_metrics['time'] - last_metrics['time'])
         if delta < 0:
-            print name + " is less 0"
+            print(name + " is less 0")
             delta = 0
     except KeyError:
         delta = 0.0
@@ -134,7 +135,7 @@ def get_softirq_delta(name):
 
 def create_desc(skel, prop):
     d = skel.copy()
-    for k, v in prop.iteritems():
+    for k, v in prop.items():
         d[k] = v
     return d
 
@@ -279,6 +280,6 @@ if __name__ == '__main__':
     while True:
         for d in descriptors:
             v = d['call_back'](d['name'])
-            print '%s = %s' % (d['name'], v)
-        print 'Sleeping 15 seconds'
+            print('%s = %s' % (d['name'], v))
+        print('Sleeping 15 seconds')
         time.sleep(5)

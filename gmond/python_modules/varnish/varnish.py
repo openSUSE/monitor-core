@@ -109,7 +109,7 @@ def get_delta(name):
     try:
         delta = float(curr_metrics['data'][name] - last_metrics['data'][name]) / (curr_metrics['time'] - last_metrics['time'])
         if delta < 0:
-            print "Less than 0"
+            print("Less than 0")
             delta = 0
     except StandardError:
         delta = 0
@@ -1039,5 +1039,5 @@ if __name__ == '__main__':
     while True:
         for d in descriptors:
             print (('%s = %s') % (d['name'], d['format'])) % (d['call_back'](d['name']))
-        print 'Sleeping 15 seconds'
+        print('Sleeping 15 seconds')
         time.sleep(15)

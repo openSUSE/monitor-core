@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 # This module allows you to collect available entropy on your system. Why is
 # entropy important.
 # [http://www.chrissearle.org/node/326]
@@ -53,4 +54,4 @@ if __name__ == '__main__':
     metric_init({})
     for d in descriptors:
         v = d['call_back'](d['name'])
-        print 'value for %s is %u' % (d['name'],  v)
+        print('value for %s is %u' % (d['name'],  v))
