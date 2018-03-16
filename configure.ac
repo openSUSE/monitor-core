@@ -168,6 +168,10 @@ AC_ARG_WITH( python,
 [  --with-python=PATH      Specify prefix for python or full path to interpreter],
 [if test x"$withval" != xno; then enable_python="yes"; PYTHON_BIN="$withval"; fi])
 
+AC_ARG_WITH( python3,
+[  --with-python3=PATH     Specify prefix for python3 or full path to interpreter],
+[if test x"$withval" != xno; then enable_python3="yes"; PYTHON3_BIN="$withval"; fi])
+
 AC_ARG_WITH( perl,
 [  --with-perl=PATH        Specify prefix for perl or full path to interpreter],
 [if test x"$withval" != xno; then enable_perl="yes"; PERL_BIN="$withval"; fi])
@@ -242,6 +246,10 @@ AC_ARG_ENABLE(memcheck,
 AC_ARG_ENABLE( python,
 [  --disable-python        exclude mod_python and support for metric modules written in python],
 [ if test x"$enableval" != xyes; then enable_python="no"; fi ], [ enable_python="yes" ] )
+
+AC_ARG_ENABLE( python3,
+[  --enable-python3        include mod_python3 and support for metric modules written in python3],
+[ if test x"$enableval" != xno; then enable_python3="yes"; fi ], [ enable_python3="no" ] )
 
 AC_ARG_ENABLE( perl,
 [  --enable-perl           include mod_perl and support for metric modules written in perl],
@@ -350,6 +358,54 @@ fi
 AC_MSG_CHECKING(Python support)
 AC_MSG_RESULT($enable_python)
 AM_CONDITIONAL(BUILD_PYTHON, test x"$enable_python" = xyes)
+
+if test x"$enable_python3" = xyes; then
+  echo
+  echo Checking for python3
+
+  # check for Python3 executable
+  if test -z "$PYTHON3_BIN"; then
+    AC_PATH_PROG(PYTHON3_BIN, python3)
+  else
+    if test -d "$PYTHON3_BIN"; then
+      PYTHON3_BIN="$PYTHON3_BIN/bin/python3"
+    fi
+  fi
+
+  if test -n "$PYTHON3_BIN"; then
+    # find out python3 version
+    AC_MSG_CHECKING(Python3 version)
+    Py3VERSION=`$PYTHON3_BIN -c ['import sys; print(sys.version[:3])'`]
+    Py3MAJVERSION=`$PYTHON3_BIN -c ['import sys; print(sys.version[:1])'`]
+
+    Py3EXEC_INSTALLDIR=`$PYTHON3_BIN -c "import sys; print(sys.exec_prefix)"`
+    if test -f "$Py3EXEC_INSTALLDIR/include/python$Py3VERSION/Python.h"; then
+      PYTHON3_INCLUDES="-I$Py3EXEC_INSTALLDIR/include/python$Py3VERSION"
+    else
+      if test -f "$Py3EXEC_INSTALLDIR/include/python${Py3VERSION}m/Python.h"; then
+        Py3VERSION=${Py3VERSION}m
+        PYTHON3_INCLUDES="-I$Py3EXEC_INSTALLDIR/include/python${Py3VERSION}"
+      else
+        PYTHON3_INCLUDES=""
+        enable_python3="no"
+      fi
+    fi
+    if test x"$enable_python3" = xyes; then
+      AC_MSG_RESULT($Py3VERSION)
+      PYTHON3_VERSION=$Py3VERSION
+      AC_SUBST(PYTHON3_VERSION)
+      AC_SUBST(PYTHON3_INCLUDES)
+    else
+      AC_MSG_RESULT("Cannot determine")
+    fi
+  else
+    enable_python3="no"
+  fi
+fi
+
+AC_MSG_CHECKING(Python3 support)
+AC_MSG_RESULT($enable_python3)
+AM_CONDITIONAL(BUILD_PYTHON3, test x"$enable_python3" = xyes)
 
 if test x"$enable_perl" = xyes; then
   echo
