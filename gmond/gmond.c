@@ -21,6 +21,7 @@
 #endif
 #ifdef LINUX
 #include <sys/utsname.h>
+#include <dlfcn.h>
 #endif
 #include <zlib.h>
 
@@ -2306,6 +2307,14 @@ load_metric_modules( void )
     cfg_t *tmp;
     int j;
     apr_hash_t *modules_loaded = apr_hash_make(global_context);
+
+    if(!dlopen("libpython3", RTLD_LAZY | RTLD_DEEPBIND)) {
+        err_quit("Failed to preload libpython3.");
+    }
+
+    if(!dlopen("libpython2", RTLD_LAZY | RTLD_DEEPBIND)) {
+        err_quit("Failed to preload libpython2.");
+    }
 
     tmp = cfg_getsec( config_file, "modules");
     for (j = 0; j < cfg_size(tmp, "module"); j++) 

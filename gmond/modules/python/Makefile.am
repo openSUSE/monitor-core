@@ -28,14 +28,14 @@ else
 pkglib_LTLIBRARIES    = $(PKGLIB_LIBRARY_NAMES)
 modpython_la_SOURCES  = mod_python.c
 modpython_la_CPPFLAGS = @PYTHON_INCLUDES@
-#modpython_la_LDFLAGS  = -module -avoid-version -lpython@PYTHON_VERSION@ -Bsymbolic
+#modpython_la_LDFLAGS  = -module -avoid-version -Bsymbolic
 modpython_la_LDFLAGS  = -module -avoid-version
 
 if BUILD_PYTHON3
 modpython3_la_SOURCES  = mod_python.c
 modpython3_la_CPPFLAGS = @PYTHON3_INCLUDES@ $(AM_CFLAGS)
 modpython3_la_CFLAGS   = -DBUILD_PYTHON3
-#modpython3_la_LDFLAGS  = -module -avoid-version -lpython@PYTHON3_VERSION@ -Bsymbolic
+#modpython3_la_LDFLAGS  = -module -avoid-version -Bsymbolic
 modpython3_la_LDFLAGS  = -module -avoid-version
 endif
 
